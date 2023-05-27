@@ -1,5 +1,6 @@
-import 'package:adarshpachori/models/exercise.dart';
+import 'package:adarshpachori/models/workout.dart';
 import 'package:adarshpachori/screens/exercise_expanded_page.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
 class FitnessScreen extends StatefulWidget {
@@ -10,31 +11,30 @@ class FitnessScreen extends StatefulWidget {
 }
 
 class _FitnessScreenState extends State<FitnessScreen> {
-  String dropdownValue = "Mobility";
-  List<String> dropdownlist = <String>["Mobility", "Strength"];
-  List<Exercise> mobilityExercises = [
-    Exercise(name: "Warrior Pose", duration: 30.0, youtubeLink: ""),
-    Exercise(name: "Cobra", duration: 10.0, youtubeLink: ""),
-    Exercise(name: "Downward Dog", duration: 15.0, youtubeLink: ""),
-    Exercise(name: "Zumba exercises", duration: 20.0, youtubeLink: ""),
-    Exercise(name: "Calisthenics", duration: 5.0, youtubeLink: ""),
-    Exercise(name: "Russian Twists", duration: 2.0, youtubeLink: ""),
-    Exercise(name: "Ab Roll", duration: 1.0, youtubeLink: "")
-  ];
-  List<Exercise> strengthExercises = [
-    Exercise(name: "Plank", duration: 30.0, youtubeLink: ""),
-    Exercise(name: "Pull Up", duration: 10.0, youtubeLink: ""),
-    Exercise(name: "Bicep Curl", duration: 15.0, youtubeLink: ""),
-    Exercise(name: "7-7-7", duration: 20.0, youtubeLink: ""),
-    Exercise(name: "Hammer Curls", duration: 5.0, youtubeLink: ""),
-    Exercise(name: "Lateral Raises", duration: 2.0, youtubeLink: ""),
-    Exercise(name: "Shoulder Press", duration: 1.0, youtubeLink: ""),
-    Exercise(name: "Tricep Extensions", duration: 1.0, youtubeLink: "")
-  ];
+  String dropdownValue = "Muscle Building";
+
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
+  List<String> dropdownlist = ["Muscle Building"];
+  bool runOnce = false;
+  void updateDropDown() async {
+    await firestore.collection('workouts').get().then((value) {
+      setState(() {
+        dropdownlist = value.docs
+            .map((document) => document['category'] as String)
+            .toSet()
+            .toList();
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double heightOfScreen = MediaQuery.of(context).size.height;
     double widthOfScreen = MediaQuery.of(context).size.width;
+    if (!runOnce) {
+      runOnce = true;
+      updateDropDown();
+    }
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -70,22 +70,91 @@ class _FitnessScreenState extends State<FitnessScreen> {
           child: const Text("\t\t\t\t\t Daily Regimen:"),
         ),
         Container(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            height: 0.6 * heightOfScreen,
-            width: 0.9 * widthOfScreen,
-            child: SingleChildScrollView(
-              child: Column(
-                children: (dropdownValue == "Mobility"
+          padding: const EdgeInsets.only(left: 10, right: 10),
+          height: 0.6 * heightOfScreen,
+          width: 0.9 * widthOfScreen,
+          child: StreamBuilder<QuerySnapshot>(
+            stream: firestore.collection('workouts').snapshots(),
+            builder:
+                (BuildContext context, AsyncSnapshot<QuerySnapshot> snapshot) {
+              if (snapshot.hasError) {
+                return Text('Error: ${snapshot.error}');
+              }
+
+              if (snapshot.connectionState == ConnectionState.waiting) {
+                return const CircularProgressIndicator();
+              }
+
+              List<QueryDocumentSnapshot> documents = snapshot.data!.docs;
+
+              List<QueryDocumentSnapshot> documentsFiltered =
+                  documents.where((doc) {
+                return (doc.data() as Map<String, dynamic>)['category'] ==
+                    dropdownValue;
+              }).toList();
+              return ListView.builder(
+                itemCount: documentsFiltered.length,
+                itemBuilder: (BuildContext context, int index) {
+                  Map<String, dynamic> mappedData =
+                      documentsFiltered[index].data() as Map<String, dynamic>;
+                  Workout workoutData = Workout(
+                      category: mappedData['category'],
+                      daysPerWeek: mappedData['days_per_week'],
+                      description: mappedData['description'],
+                      equipment: mappedData['equipment'],
+                      goal: mappedData['goal'],
+                      name: mappedData['name'],
+                      programDuration: mappedData['program_duration'],
+                      timePerWorkout: mappedData['time_per_workout'],
+                      trainingLevel: mappedData['training_level'],
+                      url: mappedData['url']);
+                  // Build your widget using the data
+                  return GestureDetector(
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        PageRouteBuilder(
+                          pageBuilder:
+                              (context, animation, secondaryAnimation) =>
+                                  ExerciseFullPage(workoutVal: workoutData),
+                          transitionsBuilder:
+                              (context, animation, secondaryAnimation, child) {
+                            return FadeTransition(
+                              opacity: animation,
+                              child: child,
+                            );
+                          },
+                        ),
+                      );
+                    },
+                    child: Container(
+                      height: 0.1 * heightOfScreen,
+                      width: 0.9 * widthOfScreen,
+                      padding: const EdgeInsets.only(top: 10, bottom: 10),
+                      margin: const EdgeInsets.symmetric(vertical: 5),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Text(workoutData.name),
+                    ),
+                  );
+                },
+              );
+            },
+          ),
+
+          /*(dropdownValue == "Mobility"
                         ? mobilityExercises
                         : strengthExercises)
-                    .map((Exercise exercise) => GestureDetector(
+                    .map((Workout workout) => GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               PageRouteBuilder(
                                 pageBuilder:
                                     (context, animation, secondaryAnimation) =>
-                                        ExerciseFullPage(exerciseVal: exercise),
+                                        ExerciseFullPage(workoutVal: workout),
                                 transitionsBuilder: (context, animation,
                                     secondaryAnimation, child) {
                                   return FadeTransition(
@@ -105,12 +174,11 @@ class _FitnessScreenState extends State<FitnessScreen> {
                               color: Colors.grey[300],
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(exercise.name),
+                            child: Text(workout.name),
                           ),
                         ))
-                    .toList(),
-              ),
-            ))
+                    .toList(),*/
+        ),
       ],
     );
   }
