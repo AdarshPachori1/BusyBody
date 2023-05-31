@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/src/widgets/framework.dart';
 import 'package:flutter/src/widgets/placeholder.dart';
-import 'package:health_kit_reporter/health_kit_reporter.dart';
-import 'package:health_kit_reporter/model/type/quantity_type.dart';
+import 'package:health/health.dart';
+import 'package:flutter/services.dart';
 
 class SleepScreen extends StatefulWidget {
   const SleepScreen({super.key});
@@ -12,50 +11,92 @@ class SleepScreen extends StatefulWidget {
 }
 
 class _SleepScreenState extends State<SleepScreen> {
-  // void requestAuthorization() async {
-  //   await requestAuthorizationHealthKit().then((result) {
-  //     print("HealthKit authorization result: $result");
-  //   });
-  // }
-
-  // void requestAuthorization() async {
-  //   try {
-  //     final readTypes = <String>[];
-  //     readTypes.addAll(QuantityType.values.map((e) => e.identifier));
-  //     final writeTypes = <String>[
-  //       QuantityType.stepCount.identifier,
-  //     ];
-  //     final isRequested =
-  //         await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
-  //     if (isRequested) {
-  //       // read data/write data/observe data
-  //     }
-  //   } catch (e) {
-  //     print(e);
-  //   }
-  // }
-
+  List<HealthDataPoint> sleepData = [];
+  bool performOnce = false;
+  HealthFactory health = HealthFactory(useHealthConnectIfAvailable: true);
+  int counterSleepingPeriod = 1;
   void requestAuthorization() async {
     try {
-      final readTypes = <String>[];
-      readTypes.addAll(QuantityType.values.map((e) => e.identifier));
-      final writeTypes = <String>[
-        QuantityType.stepCount.identifier,
-      ];
-      final isRequested =
-          await HealthKitReporter.requestAuthorization(readTypes, writeTypes);
-      if (isRequested) {
-        // read data/write data/observe data
+      bool isAuthorized = await health.requestAuthorization(
+        [
+          HealthDataType.SLEEP_IN_BED,
+        ],
+      );
+      if (isAuthorized) {
+        // Authorization granted, proceed with accessing sleep data
+        // Define the query parameters
+        final endDate = DateTime.now();
+        final startDate = endDate.subtract(const Duration(hours: 24));
+        //final startDate = DateTime(now.year, now.month, now.day, 0, 0, 0);
+        //final endDate = DateTime(now.year, now.month, now.day, 23, 59, 59);
+
+        // Query the sleep data
+        List<HealthDataPoint> results = await health.getHealthDataFromTypes(
+          startDate,
+          endDate,
+          [
+            HealthDataType.SLEEP_IN_BED,
+          ],
+        );
+        // Process the sleep data
+        // for (HealthDataPoint dataPoint in results) {
+
+        //   final startDate = dataPoint.dateFrom;
+        //   final endDate = dataPoint.dateTo;
+        //   final sleepDuration = endDate.difference(startDate).inHours;
+
+        //   toUpdateSleepData.add(
+        //       "${dataPoint.value} ${dataPoint.unitString}, Start date: $startDate, End date: $endDate, Sleep duration: $sleepDuration hours");
+        // }
+        setState(() {
+          sleepData = results;
+        });
+      } else {
+        // Authorization denied or error occurred
+        print('Authorization failed');
       }
-    } catch (e) {
-      print(e);
+    } on PlatformException catch (e) {
+      print('Authorization request failed: ${e.message}');
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    // requestAuthorization();
-    requestAuthorization();
-    return const Text("Sleep Page");
+    if (!performOnce) {
+      requestAuthorization();
+      performOnce = true;
+    }
+
+    return sleepData.isEmpty
+        ? const CircularProgressIndicator(value: null)
+        : Column(
+            children: [
+              const Text("Sleeping Behavior in the past 24 hours"),
+              ...sleepData.reversed.map(
+                (dataPoint) {
+                  final startDate = dataPoint.dateFrom;
+                  final endDate = dataPoint.dateTo;
+                  final sleepDuration = endDate.difference(startDate).inHours;
+
+                  return Container(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 10.0, vertical: 20.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                            "During Sleeping period #${counterSleepingPeriod++}"),
+                        Text("You began sleeping exactly at $startDate. "),
+                        Text("You stopped Sleeping at $endDate."),
+                        Text("In total, you slept $sleepDuration hours. "),
+                        Text(
+                            "More precisely, you slept for ${dataPoint.value} ${dataPoint.unitString == "MINUTE" ? "minutes" : dataPoint.unitString}.")
+                      ],
+                    ),
+                  );
+                },
+              ).toList()
+            ],
+          );
   }
 }

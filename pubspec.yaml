@@ -39,8 +39,8 @@ dependencies:
   firebase_auth: ^4.4.2
   cloud_firestore: ^4.5.3
   geolocator: ^7.0.3
-  health_kit_reporter: ^2.1.0
-  intl: ^0.18.1
+  health: ^6.0.0
+  intl: ^0.17.0
   geocoding: ^2.0.0
   http: ^0.13.4
   location: ^4.1.1
