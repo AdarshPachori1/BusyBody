@@ -29,7 +29,7 @@ class _ExerciseFullPageState extends State<ExerciseFullPage> {
             onTap: () {
               Navigator.of(context).pop();
             },
-            child: const Row(
+            child: Row(
               children: [Icon(Icons.arrow_back), Text("Go Back")],
             ),
           ),
