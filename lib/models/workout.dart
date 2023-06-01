@@ -1,3 +1,5 @@
+import 'package:adarshpachori/models/rank.dart';
+
 import 'package:ml_linalg/linalg.dart';
 
 class Workout {
@@ -48,25 +50,15 @@ Matrix _computeNormMatrix(List<Workout> unrankedWorkouts, num userDaysPerWeek,
       .toList();
   // add user vector of criteria to the rows to be noramalized
   rows.add(Vector.fromList([userDaysPerWeek, userTimePerWorkout]));
-  final Matrix combined = Matrix.fromRows(rows);
-  return combined / combined.norm();
-}
-
-List<Vector> _getAlternatives(final Matrix matrix) {
-  final Iterable<Vector> rows = matrix.rows;
-  return rows.take(matrix.rowCount - 1).toList();
-}
-
-Vector _getUserVector(final Matrix matrix) {
-  return matrix.getRow(matrix.rowCount - 1);
+  return computeNormalizedMatrixFromRows(rows);
 }
 
 List<Workout> getRankedWorkouts(List<Workout> unsortedWorkouts,
     num userDaysPerWeek, num userTimePerWorkout) {
   final Matrix normalizedMatrix =
       _computeNormMatrix(unsortedWorkouts, userDaysPerWeek, userTimePerWorkout);
-  final List<Vector> alternatives = _getAlternatives(normalizedMatrix);
-  final Vector userVector = _getUserVector(normalizedMatrix);
+  final List<Vector> alternatives = getAlternatives(normalizedMatrix);
+  final Vector userVector = getUserVector(normalizedMatrix);
 
   final Map<Workout, double> workoutToScore = {
     for (int i = 0; i < alternatives.length; i++)
