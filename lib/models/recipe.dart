@@ -1,3 +1,5 @@
+import 'package:ml_linalg/linalg.dart';
+
 class Recipe {
   String name;
   double cookingTime;
@@ -22,4 +24,8 @@ class Recipe {
     this.ingredients = const [],
     this.cookingSteps = const [],
   });
+}
+
+List<Recipe> getRankedRecipes(List<Recipe> unsortedRecipes) {
+  return [];
 }
