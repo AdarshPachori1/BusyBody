@@ -39,16 +39,18 @@ Future<void> getCurrentUserUUID() async {
 
     final userData = userSnapshot.data();
     if (userData != null) {
+      print("got userdata");
       final Map<String, dynamic> userDataMap = userData as Map<String, dynamic>;
       final int hoursOfSleep = int.parse(userDataMap['hoursOfSleep']);
       final String homeAddress = userDataMap['homeAddress'] + userDataMap['homeCity'] + userDataMap['homeState'] + userDataMap['homeZipcode'];
       final String workAddress = userDataMap['workAddress'] + userDataMap['workCity'] + userDataMap['workState'] + userDataMap['workZipcode'];
-
+      print("got values");
       if (hoursOfSleep != null) {
         sleepTime = hoursOfSleep;
       }
       String Url = 'https://maps.googleapis.com/maps/api/distancematrix/json?origins=${homeAddress}&destinations=${workAddress}&key=AIzaSyAf_JKdwcVADXSC6XVZKi8C3HYgn7iHjWo';
       try {
+        print("got to http");
         var response = await http.get(
           Uri.parse(Url),);
         if (response.statusCode == 200) {
