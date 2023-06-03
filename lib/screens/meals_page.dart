@@ -1,4 +1,7 @@
+import 'package:adarshpachori/models/food.dart';
+import 'package:adarshpachori/models/restaurant.dart';
 import 'package:adarshpachori/screens/recipe_expanded_page.dart';
+import 'package:adarshpachori/screens/restaurant_expanded_page.dart';
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
 
@@ -22,26 +25,52 @@ class _MealsScreenState extends State<MealsScreen> {
     "Becoming more Lean"
   ];
   List<Recipe> homeRecipes = [
-    Recipe(name: "Enchiladas", cookingTime: 30.0, youtubeLink: ""),
-    Recipe(name: "Tacos", cookingTime: 10.0, youtubeLink: ""),
-    Recipe(name: "Acai Bowl", cookingTime: 15.0, youtubeLink: ""),
-    Recipe(name: "Scrambled Eggs", cookingTime: 20.0, youtubeLink: ""),
-    Recipe(name: "Pasta", cookingTime: 5.0, youtubeLink: ""),
-    Recipe(name: "Burgers", cookingTime: 2.0, youtubeLink: ""),
-    Recipe(name: "Paneer Tikka Masala", cookingTime: 1.0, youtubeLink: "")
+    Recipe(
+        url: "url",
+        name: "Enchiladas",
+        description: "description of Enchiladas",
+        calories: 950,
+        protein: 30,
+        carbs: 15,
+        fat: 5),
+    Recipe(
+        url: "url",
+        name: "Tacos",
+        description: "description of Tacos",
+        calories: 860,
+        protein: 20,
+        carbs: 15,
+        fat: 5),
+    Recipe(
+        url: "url",
+        name: "Burrito",
+        description: "description of Burrito",
+        calories: 500,
+        protein: 10,
+        carbs: 4,
+        fat: 4),
+    Recipe(
+        url: "url",
+        name: "Pancakes",
+        description: "description of Pancakes",
+        calories: 1200,
+        protein: 45,
+        carbs: 25,
+        fat: 10),
   ];
 
-  List<Recipe> restaurantFood = [
-    Recipe(name: "In-N-Out Double_Double", cookingTime: 30.0, youtubeLink: ""),
-    Recipe(name: "Taco Bell Chalupa", cookingTime: 10.0, youtubeLink: ""),
-    Recipe(
-        name: "Panda Express Orange Chicken",
-        cookingTime: 15.0,
-        youtubeLink: ""),
-    Recipe(
-        name: "Charburger from the Habit", cookingTime: 20.0, youtubeLink: ""),
-    Recipe(name: "Subway Sandwich", cookingTime: 5.0, youtubeLink: ""),
-    Recipe(name: "Acai Bowl from BlueBowl", cookingTime: 2.0, youtubeLink: ""),
+  List<Restaurant> unrankedRestaurants = [
+    Restaurant(
+        name: "Chic-Fil-A",
+        imageUrl: "imageUrl",
+        url: "restaurantUrl",
+        rating: 5,
+        sentimentRating: 4,
+        latitude: 110.0,
+        longitude: -112.1,
+        priceLevel: "\$\$",
+        address: "address",
+        phone: "phone")
   ];
 
   void requestPermission() async {
@@ -81,6 +110,14 @@ class _MealsScreenState extends State<MealsScreen> {
     double heightOfScreen = MediaQuery.of(context).size.height;
     double widthOfScreen = MediaQuery.of(context).size.width;
     requestPermission();
+
+    // rank recipes before recommending
+    final List<Recipe> rankedRecipes =
+        getRankedRecipes(homeRecipes, 1000, 30, 25, 10);
+    // rank restaurants before recommending
+    final List<Restaurant> rankedRestaurants = getRankedRestaurants(
+        unrankedRestaurants, 2); // TODO: use to dislay list of restaurants
+
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
       children: [
@@ -142,16 +179,20 @@ class _MealsScreenState extends State<MealsScreen> {
             child: SingleChildScrollView(
               child: Column(
                 children: (dropdownValueLocation == "Home"
-                        ? homeRecipes
-                        : restaurantFood)
-                    .map((Recipe recipe) => GestureDetector(
+                        ? rankedRecipes
+                        : rankedRestaurants)
+                    .map((Food recipe) => GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               PageRouteBuilder(
                                 pageBuilder:
                                     (context, animation, secondaryAnimation) =>
-                                        RecipeFullPage(recipeVal: recipe),
+                                        (dropdownValueLocation == "Home"
+                                            ? RecipeFullPage(recipeVal: recipe)
+                                            : RestaurantFullPage(
+                                                restaurant: recipe)),
+                                // RecipeFullPage(recipeVal: recipe),
                                 transitionsBuilder: (context, animation,
                                     secondaryAnimation, child) {
                                   return FadeTransition(
