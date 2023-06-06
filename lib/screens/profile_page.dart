@@ -14,15 +14,23 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int homeSelectedState = 3;
+  int homeSelectedState = 4;
   int workSelectedState = 4;
-  int selectedHeight = 0;
+  late int selectedHeight;
   int selectedGender = 0;
+  int selectedDays = 4;
   String gender = "Female";
   String height = "4' 1";
-  double activityLevel = 1; //1<=activityLevel<=5
-  String homeState = "AL";
-  String workState = "AL";
+  double activityLevel = 5; //1<=activityLevel<=5
+  String homeState = "CA";
+  String workState = "CA";
+  int daysPerWeek = 0;
+  double desiredCalories= 0;
+  double desiredProtein = 0;
+  double desiredCarbs = 0;
+  double desiredFat = 0;
+  double timePerWorkout = 0;
+  double priceLevel = 5; //1<=priceLevel<=5
 
   final TextEditingController firstNameInputController =
       TextEditingController();
@@ -43,6 +51,11 @@ class _ProfileScreenState extends State<ProfileScreen> {
   final TextEditingController workCityInputController = TextEditingController();
   final TextEditingController workZipcodeInputController =
       TextEditingController();
+  final TextEditingController desiredCaloriesInputController = TextEditingController();
+  final TextEditingController desiredCarbsInputController = TextEditingController();
+  final TextEditingController desiredProteinInputController = TextEditingController();
+  final TextEditingController desiredFatInputController = TextEditingController();
+  final TextEditingController timePerWorkoutInputController = TextEditingController();
   FirebaseFirestore firestore = FirebaseFirestore.instance;
   bool _isLoading = false;
 
@@ -99,6 +112,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
     'WI',
     'WY'
   ];
+  final List<int> daysPerWeekChoices = <int>[1,2,3,4,5,6,7];
   final List<String> genderNames = <String>[
     "Female",
     "Male",
@@ -144,6 +158,16 @@ class _ProfileScreenState extends State<ProfileScreen> {
     "6' 11\"",
     "7' 0\"",
   ];
+
+  @override
+  void initState() {
+    Firebase.initializeApp();
+    getCurrentUserUUID();
+    super.initState();
+    // scrollController = FixedExtentScrollController(initialItem: selectedHeight);
+    scrollController2 = FixedExtentScrollController(initialItem: homeSelectedState);
+  }
+
   Future<void> getCurrentUserUUID() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final User? user = auth.currentUser;
@@ -175,7 +199,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
         selectedGender = genderNames.indexOf(userDataMap['gender']);
         homeSelectedState = stateNames.indexOf(userDataMap['homeState']);
         workSelectedState = stateNames.indexOf(userDataMap['workState']);
-        // scrollController.jumpToItem(selectedHeight);
+        selectedDays = daysPerWeekChoices.indexOf(userDataMap['daysPerWeek']);
+        desiredCaloriesInputController.text = userDataMap['desiredCalories'];
+        desiredProteinInputController.text = userDataMap['desiredProtein'];
+        desiredCarbsInputController.text = userDataMap['desiredCarbs'];
+        desiredFatInputController.text = userDataMap['desiredFat'];
+        timePerWorkoutInputController.text = userDataMap['timePerWorkout'].toString();
+        priceLevel = userDataMap['priceLevel'];
+        activityLevel = userDataMap['activityLevel'];
       }
       // Use currentUserUUID as needed
     }
@@ -193,6 +224,18 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final String newWorkAddress = workAddressInputController.text;
       final String newWorkCity = workCityInputController.text;
       final String newWorkZipcode = workZipcodeInputController.text;
+      // no height
+      // no gender
+      // no home selected state
+      // no work selected state
+      final String newDesiredCalories = desiredCaloriesInputController.text;
+      final String newDesiredProtein = desiredProteinInputController.text;
+      final String newDesiredCarbs = desiredCarbsInputController.text;
+      final String newDesiredFat = desiredFatInputController.text;
+      final int newTimePerWorkout = int.parse(timePerWorkoutInputController.text);  
+      // no priceLevel 
+      // no activity level 
+      // no daysPerWeek
 
       final FirebaseAuth auth = FirebaseAuth.instance;
       final User? user = auth.currentUser;
@@ -213,13 +256,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'workAddress': newWorkAddress,
           'workCity': newWorkCity,
           'workZipcode': newWorkZipcode,
-          'height': height,
+          'desiredCalories': newDesiredCalories,
+          'desiredProtein': newDesiredProtein,
+          'desiredCarbs': newDesiredCarbs,
+          'desiredFat': newDesiredFat,
+          'timePerWorkout': newTimePerWorkout
         });
       }
     }
   }
 
-  late FixedExtentScrollController scrollController;
+  // late FixedExtentScrollController scrollController;
   late FixedExtentScrollController scrollController2;
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
@@ -239,15 +286,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                 child: child,
               ),
             ));
-  }
-
-  @override
-  void initState() {
-    Firebase.initializeApp();
-    getCurrentUserUUID();
-    super.initState();
-    scrollController = FixedExtentScrollController(initialItem: selectedHeight);
-    scrollController2 = FixedExtentScrollController(initialItem: homeSelectedState);
   }
 
   @override
@@ -297,100 +335,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
                   },),
             ],
           ),
-          SizedBox(
-                              height: 90,
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Text('Gender: ',style: TextStyle(fontSize: 22.0)),
-                                    CupertinoButton(
-                                      padding: EdgeInsets.zero,
-                                      // Display a CupertinoPicker with list of fruits.
-                                      onPressed: () => _showDialog(
-                                        CupertinoPicker(
-                                          magnification: 1.22,
-                                          squeeze: 1.2,
-                                          useMagnifier: true,
-                                          itemExtent: kItemExtent,
-                                          // This is called when selected item is changed.
-                                          onSelectedItemChanged:
-                                              (int selectedItem) {
-                                            setState(() {
-                                              selectedGender = selectedItem;
-                                              gender =
-                                                  genderNames[selectedGender];
-                                            });
-                                          },
-                                          children: List<Widget>.generate(
-                                              genderNames.length, (int index) {
-                                            return Center(
-                                              child: Text(
-                                                genderNames[index],
-                                              ),
-                                            );
-                                          }),
-                                        ),
-                                      ),
-                                      // This displays the selected fruit name.
-                                      child: Text(
-                                        genderNames[selectedGender],
-                                        style: const TextStyle(
-                                          fontSize: 22.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),
-          SizedBox(
-                              height: 90,
-                              child: Center(
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.start,
-                                  children: <Widget>[
-                                    const Text("Height:  ", style: TextStyle(fontSize: 24.0)), // set font size to 24),
-                                    CupertinoButton(
-                                      padding: EdgeInsets.zero,
-                                      // Display a CupertinoPicker with list of fruits.
-                                      onPressed: () => _showDialog(
-                                        CupertinoPicker(
-                                          magnification: 1.22,
-                                          squeeze: 1.2,
-                                          useMagnifier: true,
-                                          itemExtent: kItemExtent,
-                                          // This is called when selected item is changed.
-                                          onSelectedItemChanged:
-                                              (int selectedItem) {
-                                            setState(() {
-                                              selectedHeight = selectedItem;
-                                              height =
-                                                  heightNames[selectedHeight];
-                                            });
-                                          },
-                                          children: List<Widget>.generate(
-                                              heightNames.length, (int index) {
-                                            return Center(
-                                              child: Text(
-                                                heightNames[index],
-                                              ),
-                                            );
-                                          }),
-                                        ),
-                                      ),
-                                      // This displays the selected fruit name.
-                                      child: Text(
-                                        heightNames[selectedHeight],
-                                        style: const TextStyle(
-                                          fontSize: 22.0,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            ),  
                 SizedBox(
                       height: 90,
                       child: Padding(
@@ -450,24 +394,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
               ),
               IconButton(
                   icon: Icon(Icons.edit),
-                  onPressed: () async {
-                    // if (lastNameInputController.text.isNotEmpty) {
-                    //   final String newHomeAddress = homeAddressInputController.text;
-
-                    //   final FirebaseAuth auth = FirebaseAuth.instance;
-                    //   final User? user = auth.currentUser;
-                    //   final CollectionReference usersCollection =
-                    //       FirebaseFirestore.instance.collection('users');
-
-                    //   if (user != null) {
-                    //     final String userUUID = user.uid;
-
-                    //     await usersCollection.doc(userUUID).update({
-                    //       'homeAddress': newHomeAddress,
-                    //     });
-                    //   }
-                    // }
-                  },),
+                  onPressed: () async {  },),
             ],
           ),
           Row(
@@ -482,22 +409,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
               IconButton(
                   icon: Icon(Icons.edit),
                   onPressed: () async {
-                    // if (lastNameInputController.text.isNotEmpty) {
-                    //   final String newHomeCity = homeCityInputController.text;
-
-                    //   final FirebaseAuth auth = FirebaseAuth.instance;
-                    //   final User? user = auth.currentUser;
-                    //   final CollectionReference usersCollection =
-                    //       FirebaseFirestore.instance.collection('users');
-
-                    //   if (user != null) {
-                    //     final String userUUID = user.uid;
-
-                    //     await usersCollection.doc(userUUID).update({
-                    //       'homeCity': newHomeCity,
-                    //     });
-                    //   }
-                    // }
                   },),
             ],
           ),
@@ -705,6 +616,246 @@ class _ProfileScreenState extends State<ProfileScreen> {
                         ),
                       ),
                     ),
+          SizedBox(
+                              height: 150,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Column(children: <Widget>[
+                                    const Text(
+                                      "Activity Level:",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: CupertinoSlider(
+                                        key: const Key('slider'),
+                                        value: activityLevel,
+                                        divisions: 4,
+                                        max: 100,
+                                        activeColor:
+                                            CupertinoColors.systemPurple,
+                                        thumbColor:
+                                            CupertinoColors.systemPurple,
+                                        onChanged: (double value) {
+                                          setState(() {
+                                            activityLevel = value;
+                                          });
+                                        },
+                                      ),
+                                    )
+                                  ])),
+                            ),
+          SizedBox(
+                              height: 150,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Column(children: <Widget>[
+                                    const Text(
+                                      "Price Level:",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: CupertinoSlider(
+                                        key: const Key('slider'),
+                                        value: priceLevel,
+                                        divisions: 4,
+                                        max: 100,
+                                        activeColor:
+                                            CupertinoColors.systemPurple,
+                                        thumbColor:
+                                            CupertinoColors.systemPurple,
+                                        onChanged: (double value) {
+                                          setState(() {
+                                            priceLevel = value;
+                                          });
+                                        },
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    const Text('Workout Days Per Week: '),
+                                    CupertinoButton(
+                                      padding: EdgeInsets.zero,
+                                      // Display a CupertinoPicker with list of fruits.
+                                      onPressed: () => _showDialog(
+                                        CupertinoPicker(
+                                          magnification: 1.22,
+                                          squeeze: 1.2,
+                                          useMagnifier: true,
+                                          itemExtent: kItemExtent,
+                                          // This is called when selected item is changed.
+                                          onSelectedItemChanged:
+                                              (int selectedItem) {
+                                            setState(() {
+                                              selectedDays = selectedItem;
+                                              daysPerWeek =
+                                                  daysPerWeekChoices[selectedDays];
+                                            });
+                                          },
+                                          children: List<Widget>.generate(
+                                              daysPerWeekChoices.length, (int index) {
+                                            return Center(
+                                              child: Text(
+                                                daysPerWeekChoices[index].toString(),
+                                              ),
+                                            );
+                                          }),
+                                        ),
+                                      ),
+                                      // This displays the selected fruit name.
+                                      child: Text(
+                                        daysPerWeekChoices[selectedDays].toString(),
+                                        style: const TextStyle(
+                                          fontSize: 22.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Desired Calories",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: desiredCaloriesInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Desired Protein",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: desiredProteinInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Desired Carbs",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: desiredCarbsInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Desired Fat",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: desiredFatInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Time Per Workout",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: timePerWorkoutInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "How many hours of sleep\n would you like to get?",
+                                      style: TextStyle(fontSize: 20.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: hoursOfSleepInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+
                     ElevatedButton(
           onPressed: () {
             updateProfile();
