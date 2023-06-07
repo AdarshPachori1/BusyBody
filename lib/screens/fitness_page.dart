@@ -1,3 +1,4 @@
+import 'package:adarshpachori/models/recipe.dart';
 import 'package:adarshpachori/models/workout.dart';
 import 'package:adarshpachori/screens/exercise_expanded_page.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
@@ -99,32 +100,38 @@ class _FitnessScreenState extends State<FitnessScreen> {
                       return (doc.data() as Map<String, dynamic>)['category'] ==
                           dropdownValue;
                     }).toList();
+
+                    List<Workout> unrankedWorkouts =
+                        documentsFiltered.map((doc) {
+                      return Workout(
+                          category: doc['category'],
+                          daysPerWeek: doc['days_per_week'],
+                          description: doc['description'],
+                          equipment: doc['equipment'],
+                          goal: doc['goal'],
+                          name: doc['name'],
+                          programDuration: doc['program_duration'],
+                          timePerWorkout: doc['time_per_workout'],
+                          trainingLevel: doc['training_level'],
+                          url: doc['url']);
+                    }).toList();
+
+                    List<Workout> rankedWorkouts =
+                        getRankedWorkouts(unrankedWorkouts, 5, 30);
+
                     return ListView.builder(
-                      itemCount: documentsFiltered.length,
+                      itemCount: rankedWorkouts.length,
                       itemBuilder: (BuildContext context, int index) {
-                        Map<String, dynamic> mappedData =
-                            documentsFiltered[index].data()
-                                as Map<String, dynamic>;
-                        Workout workoutData = Workout(
-                            category: mappedData['category'],
-                            daysPerWeek: mappedData['days_per_week'],
-                            description: mappedData['description'],
-                            equipment: mappedData['equipment'],
-                            goal: mappedData['goal'],
-                            name: mappedData['name'],
-                            programDuration: mappedData['program_duration'],
-                            timePerWorkout: mappedData['time_per_workout'],
-                            trainingLevel: mappedData['training_level'],
-                            url: mappedData['url']);
                         // Build your widget using the data
                         return GestureDetector(
                           onTap: () {
                             Navigator.push(
                               context,
                               PageRouteBuilder(
-                                pageBuilder: (context, animation,
-                                        secondaryAnimation) =>
-                                    ExerciseFullPage(workoutVal: workoutData),
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        ExerciseFullPage(
+                                            workoutVal: rankedWorkouts[index]),
                                 transitionsBuilder: (context, animation,
                                     secondaryAnimation, child) {
                                   return FadeTransition(
@@ -144,7 +151,7 @@ class _FitnessScreenState extends State<FitnessScreen> {
                               color: Colors.grey[300],
                               borderRadius: BorderRadius.circular(20),
                             ),
-                            child: Text(workoutData.name),
+                            child: Text(rankedWorkouts[index].name),
                           ),
                         );
                       },
