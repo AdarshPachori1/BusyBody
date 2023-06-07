@@ -18,6 +18,13 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
   double activityLevel = 1; //1<=activityLevel<=5
   String homeState = "AL";
   String workState = "AL";
+  double desiredCalories= 0;
+  double desiredProtein = 0;
+  double desiredCarbs = 0;
+  double desiredFat = 0;
+  double priceLevel = 1; //1<=priceLevel<=5
+  int daysPerWeek = 0;
+  double timePerWorkout = 0;
 
   final TextEditingController firstNameInputController =
       TextEditingController();
@@ -27,6 +34,11 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
       TextEditingController();
   final TextEditingController hoursOfSleepInputController =
       TextEditingController();
+  final TextEditingController desiredCaloriesInputController = TextEditingController();
+  final TextEditingController desiredProteinInputController = TextEditingController();
+  final TextEditingController desiredCarbsInputController = TextEditingController();
+  final TextEditingController desiredFatInputController = TextEditingController();
+  final TextEditingController timePerWorkoutInputController = TextEditingController();
   final TextEditingController homeAddressInputController =
       TextEditingController();
   final TextEditingController homeCityInputController = TextEditingController();
@@ -100,6 +112,7 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
     "Other",
     "Prefer not to say",
   ];
+  final List<int> daysPerWeekChoices = <int>[1,2,3,4,5,6,7];
   final List<String> heightNames = <String>[
     "4' 1\"",
     "4' 2\"",
@@ -142,6 +155,7 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
   int homeSelectedState = 0;
   int workSelectedState = 0;
   int selectedHeight = 0;
+  int selectedDays = 0;
   int selectedGender = 0;
 
   void _showDialog(Widget child) {
@@ -180,6 +194,13 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
           'gender': gender,
           'height': height,
           'activityLevel': activityLevel,
+          'desiredCalories': desiredCaloriesInputController.text,
+          'desiredProtein': desiredProteinInputController.text,
+          'desiredCarbs': desiredCarbsInputController.text,
+          'desiredFat': desiredFatInputController.text,
+          'priceLevel': priceLevel,
+          'daysPerWeek': daysPerWeek,
+          'timePerWorkout': timePerWorkoutInputController.text,
           'hoursOfSleep': hoursOfSleepInputController.text,
           'homeAddress': homeAddressInputController.text,
           'homeCity': homeCityInputController.text,
@@ -429,6 +450,193 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
                                             activityLevel = value;
                                           });
                                         },
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 150,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Column(children: <Widget>[
+                                    const Text(
+                                      "Price Level:",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: CupertinoSlider(
+                                        key: const Key('slider'),
+                                        value: priceLevel,
+                                        divisions: 4,
+                                        max: 100,
+                                        activeColor:
+                                            CupertinoColors.systemPurple,
+                                        thumbColor:
+                                            CupertinoColors.systemPurple,
+                                        onChanged: (double value) {
+                                          setState(() {
+                                            priceLevel = value;
+                                          });
+                                        },
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Center(
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: <Widget>[
+                                    const Text('Workout Days Per Week: '),
+                                    CupertinoButton(
+                                      padding: EdgeInsets.zero,
+                                      // Display a CupertinoPicker with list of fruits.
+                                      onPressed: () => _showDialog(
+                                        CupertinoPicker(
+                                          magnification: 1.22,
+                                          squeeze: 1.2,
+                                          useMagnifier: true,
+                                          itemExtent: kItemExtent,
+                                          // This is called when selected item is changed.
+                                          onSelectedItemChanged:
+                                              (int selectedItem) {
+                                            setState(() {
+                                              selectedDays = selectedItem;
+                                              daysPerWeek =
+                                                  daysPerWeekChoices[selectedDays];
+                                            });
+                                          },
+                                          children: List<Widget>.generate(
+                                              daysPerWeekChoices.length, (int index) {
+                                            return Center(
+                                              child: Text(
+                                                daysPerWeekChoices[index].toString(),
+                                              ),
+                                            );
+                                          }),
+                                        ),
+                                      ),
+                                      // This displays the selected fruit name.
+                                      child: Text(
+                                        daysPerWeekChoices[selectedDays].toString(),
+                                        style: const TextStyle(
+                                          fontSize: 22.0,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Desired Calories",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: desiredCaloriesInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Desired Protein",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: desiredProteinInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Desired Carbs",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: desiredCarbsInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Desired Fat",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: desiredFatInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
+                                      ),
+                                    )
+                                  ])),
+                            ),
+                            SizedBox(
+                              height: 90,
+                              child: Padding(
+                                  padding:
+                                      const EdgeInsets.symmetric(vertical: 8.0),
+                                  child: Row(children: <Widget>[
+                                    const Text(
+                                      "Time Per Workout",
+                                      style: TextStyle(fontSize: 22.0),
+                                    ),
+                                    const SizedBox(width: 8.0),
+                                    Flexible(
+                                      child: TextField(
+                                        controller: timePerWorkoutInputController,
+                                        keyboardType: TextInputType.number,
+                                        decoration: const InputDecoration(
+                                          border: UnderlineInputBorder(),
+                                        ),
                                       ),
                                     )
                                   ])),
