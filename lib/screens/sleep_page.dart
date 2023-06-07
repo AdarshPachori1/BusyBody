@@ -38,16 +38,6 @@ class _SleepScreenState extends State<SleepScreen> {
             HealthDataType.SLEEP_IN_BED,
           ],
         );
-        // Process the sleep data
-        // for (HealthDataPoint dataPoint in results) {
-
-        //   final startDate = dataPoint.dateFrom;
-        //   final endDate = dataPoint.dateTo;
-        //   final sleepDuration = endDate.difference(startDate).inHours;
-
-        //   toUpdateSleepData.add(
-        //       "${dataPoint.value} ${dataPoint.unitString}, Start date: $startDate, End date: $endDate, Sleep duration: $sleepDuration hours");
-        // }
         setState(() {
           sleepData = results;
         });

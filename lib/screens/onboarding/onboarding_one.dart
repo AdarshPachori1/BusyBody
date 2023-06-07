@@ -160,22 +160,23 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
 
   void _showDialog(Widget child) {
     showCupertinoModalPopup<void>(
-        context: context,
-        builder: (BuildContext context) => Container(
-              height: 216,
-              padding: const EdgeInsets.only(top: 6.0),
-              // The Bottom margin is provided to align the popup above the system navigation bar.
-              margin: EdgeInsets.only(
-                bottom: MediaQuery.of(context).viewInsets.bottom,
-              ),
-              // Provide a background color for the popup.
-              // color: CupertinoColors.systemBackground.resolveFrom(context),
-              // Use a SafeArea widget to avoid system overlaps.
-              child: SafeArea(
-                top: false,
-                child: child,
-              ),
-            ));
+      context: context,
+      builder: (BuildContext context) => Container(
+        height: 216,
+        padding: const EdgeInsets.only(top: 6.0),
+        // The Bottom margin is provided to align the popup above the system navigation bar.
+        margin: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        // Provide a background color for the popup.
+        // color: CupertinoColors.systemBackground.resolveFrom(context),
+        // Use a SafeArea widget to avoid system overlaps.
+        child: SafeArea(
+          top: false,
+          child: child,
+        ),
+      ),
+    );
   }
 
   Future<void> addUser(String uuid) async {
@@ -927,7 +928,39 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
                                     (usr) {
                                       context
                                           .read<MutableValues>()
-                                          .completedSignUp();
+                                          .completedSignUp(
+                                              firstName:
+                                                  firstNameInputController.text,
+                                              lastName:
+                                                  lastNameInputController.text,
+                                              weight:
+                                                  weightInputController.text,
+                                              birthDate:
+                                                  birthDateInputController.text,
+                                              gender: gender,
+                                              height: height,
+                                              activityLevel: activityLevel,
+                                              hoursOfSleep:
+                                                  hoursOfSleepInputController
+                                                      .text,
+                                              homeAddress:
+                                                  homeAddressInputController
+                                                      .text,
+                                              homeCity:
+                                                  homeCityInputController.text,
+                                              homeState: homeState,
+                                              homeZipcode:
+                                                  homeZipcodeInputController
+                                                      .text,
+                                              workAddress:
+                                                  workAddressInputController
+                                                      .text,
+                                              workCity:
+                                                  workCityInputController.text,
+                                              workState: workState,
+                                              workZipcode:
+                                                  workZipcodeInputController
+                                                      .text);
                                     },
                                   );
                                   setState(() {

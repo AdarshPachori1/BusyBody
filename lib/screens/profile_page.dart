@@ -308,6 +308,8 @@ class _ProfileScreenState extends State<ProfileScreen> {
                       child: Column(
       children: [
         const Text("Profile Page"),
+        Text(
+            "First Name: ${Provider.of<MutableValues>(context, listen: false).user.firstName} \nLast Name: ${Provider.of<MutableValues>(context, listen: false).user.lastName}"),
         ElevatedButton(
           onPressed: () {
             Provider.of<MutableValues>(context, listen: false).signOut();
