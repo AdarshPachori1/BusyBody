@@ -14,14 +14,14 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  int homeSelectedState = 4;
-  int workSelectedState = 4;
+  int homeSelectedState = 0;
+  int workSelectedState = 0;
   late int selectedHeight;
   int selectedGender = 0;
   int selectedDays = 4;
   String gender = "Female";
   String height = "4' 1";
-  double activityLevel = 5; //1<=activityLevel<=5
+  double activityLevel = 1; //1<=activityLevel<=5
   String homeState = "CA";
   String workState = "CA";
   int daysPerWeek = 0;
@@ -30,7 +30,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   double desiredCarbs = 0;
   double desiredFat = 0;
   double timePerWorkout = 0;
-  double priceLevel = 5; //1<=priceLevel<=5
+  double priceLevel = 1; //1<=priceLevel<=5
 
   final TextEditingController firstNameInputController =
       TextEditingController();
@@ -161,7 +161,6 @@ class _ProfileScreenState extends State<ProfileScreen> {
 
   @override
   void initState() {
-    Firebase.initializeApp();
     getCurrentUserUUID();
     super.initState();
     // scrollController = FixedExtentScrollController(initialItem: selectedHeight);
@@ -171,7 +170,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   Future<void> getCurrentUserUUID() async {
     final FirebaseAuth auth = FirebaseAuth.instance;
     final User? user = auth.currentUser;
-    final CollectionReference usersCollection = FirebaseFirestore.instance.collection('users');
+    final CollectionReference usersCollection = firestore.collection('users');
 
     if (user != null) {
       final String userUUID = user.uid;
@@ -195,18 +194,25 @@ class _ProfileScreenState extends State<ProfileScreen> {
         workAddressInputController.text = userDataMap['workAddress'];
         workCityInputController.text = userDataMap['workCity'];
         workZipcodeInputController.text = userDataMap['workZipcode'];
-        selectedHeight = heightNames.indexOf(userDataMap['height']);
-        selectedGender = genderNames.indexOf(userDataMap['gender']);
-        homeSelectedState = stateNames.indexOf(userDataMap['homeState']);
-        workSelectedState = stateNames.indexOf(userDataMap['workState']);
+
+        setState(() {
+          homeSelectedState = stateNames.indexOf(userDataMap['homeState']);
+          workSelectedState = stateNames.indexOf(userDataMap['workState']);
+          priceLevel = userDataMap['priceLevel'];
+          activityLevel = userDataMap['activityLevel'];
+          selectedHeight = heightNames.indexOf(userDataMap['height']);
+          selectedGender = genderNames.indexOf(userDataMap['gender']);
+          daysPerWeek = daysPerWeekChoices.indexOf(userDataMap['daysPerWeek']);
+        });
+        
         selectedDays = daysPerWeekChoices.indexOf(userDataMap['daysPerWeek']);
         desiredCaloriesInputController.text = userDataMap['desiredCalories'];
         desiredProteinInputController.text = userDataMap['desiredProtein'];
         desiredCarbsInputController.text = userDataMap['desiredCarbs'];
         desiredFatInputController.text = userDataMap['desiredFat'];
         timePerWorkoutInputController.text = userDataMap['timePerWorkout'].toString();
-        priceLevel = userDataMap['priceLevel'];
-        activityLevel = userDataMap['activityLevel'];
+      
+        scrollController.jumpTo(homeSelectedState as double);
       }
       // Use currentUserUUID as needed
     }
@@ -224,18 +230,17 @@ class _ProfileScreenState extends State<ProfileScreen> {
       final String newWorkAddress = workAddressInputController.text;
       final String newWorkCity = workCityInputController.text;
       final String newWorkZipcode = workZipcodeInputController.text;
-      // no height
-      // no gender
-      // no home selected state
-      // no work selected state
+      final String newHomeState = homeState;
+      final String newWorkState = workState;
       final String newDesiredCalories = desiredCaloriesInputController.text;
       final String newDesiredProtein = desiredProteinInputController.text;
       final String newDesiredCarbs = desiredCarbsInputController.text;
       final String newDesiredFat = desiredFatInputController.text;
       final int newTimePerWorkout = int.parse(timePerWorkoutInputController.text);  
-      // no priceLevel 
-      // no activity level 
-      // no daysPerWeek
+      final int newPriceLevel = priceLevel as int;
+      final int newActivityLevel = activityLevel as int;
+      final int newDaysPerWeek = daysPerWeek;
+      
 
       final FirebaseAuth auth = FirebaseAuth.instance;
       final User? user = auth.currentUser;
@@ -253,22 +258,28 @@ class _ProfileScreenState extends State<ProfileScreen> {
           'homeAddress': newHomeAddress,
           'homeCity': newHomeCity,
           'homeZipcode': newHomeZipcode,
+          'homeState': newHomeState,
           'workAddress': newWorkAddress,
           'workCity': newWorkCity,
+          'workState': newWorkState,
           'workZipcode': newWorkZipcode,
           'desiredCalories': newDesiredCalories,
           'desiredProtein': newDesiredProtein,
           'desiredCarbs': newDesiredCarbs,
           'desiredFat': newDesiredFat,
-          'timePerWorkout': newTimePerWorkout
+          'timePerWorkout': newTimePerWorkout,
+          'activityLevel': newActivityLevel,
+          'priceLevel': newPriceLevel,
+          'daysPerWeek': newDaysPerWeek,
         });
       }
     }
   }
 
-  // late FixedExtentScrollController scrollController;
+  late FixedExtentScrollController scrollController;
   late FixedExtentScrollController scrollController2;
   void _showDialog(Widget child) {
+    scrollController.jumpTo(homeSelectedState as double);
     showCupertinoModalPopup<void>(
         context: context,
         builder: (BuildContext context) => Container(
@@ -289,9 +300,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
   }
 
   @override
-  Widget build(BuildContext context) {
-    WidgetsFlutterBinding.ensureInitialized();
-    
+  Widget build(BuildContext context) {    
     
     return SingleChildScrollView(
                   child: Padding(
@@ -441,7 +450,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
                                               stateNames.length, (int index) {
                                             return Center(
                                               child: Text(
-                                                stateNames[index],
+                                                stateNames[homeSelectedState],
                                               ),
                                             );
                                           }),
