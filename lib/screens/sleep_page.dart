@@ -52,6 +52,8 @@ class _SleepScreenState extends State<SleepScreen> {
 
   @override
   Widget build(BuildContext context) {
+    double heightOfScreen = MediaQuery.of(context).size.height;
+    double widthOfScreen = MediaQuery.of(context).size.width;
     if (!performOnce) {
       requestAuthorization();
       performOnce = true;
@@ -71,17 +73,21 @@ class _SleepScreenState extends State<SleepScreen> {
                   return Container(
                     padding: const EdgeInsets.symmetric(
                         horizontal: 10.0, vertical: 20.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                            "During Sleeping period #${counterSleepingPeriod++}"),
-                        Text("You began sleeping exactly at $startDate. "),
-                        Text("You stopped Sleeping at $endDate."),
-                        Text("In total, you slept $sleepDuration hours. "),
-                        Text(
-                            "More precisely, you slept for ${dataPoint.value} ${dataPoint.unitString == "MINUTE" ? "minutes" : dataPoint.unitString}.")
-                      ],
+                    height: 0.6 * heightOfScreen,
+                    width: 0.9 * widthOfScreen,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                              "During Sleeping period #${counterSleepingPeriod++}"),
+                          Text("You began sleeping exactly at $startDate. "),
+                          Text("You stopped Sleeping at $endDate."),
+                          Text("In total, you slept $sleepDuration hours. "),
+                          Text(
+                              "More precisely, you slept for ${dataPoint.value} ${dataPoint.unitString == "MINUTE" ? "minutes" : dataPoint.unitString}.")
+                        ],
+                      ),
                     ),
                   );
                 },

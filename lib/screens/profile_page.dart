@@ -313,15 +313,7 @@ class _ProfileScreenState extends State<ProfileScreen> {
             child: Column(
               children: [
                 const Text("Profile Page"),
-                Text(
-                    "First Name: ${Provider.of<MutableValues>(context, listen: false).user.firstName} \nLast Name: ${Provider.of<MutableValues>(context, listen: false).user.lastName}"),
-                ElevatedButton(
-                  onPressed: () {
-                    Provider.of<MutableValues>(context, listen: false)
-                        .signOut();
-                  },
-                  child: const Text("Sign Out"),
-                ),
+                const Text("Lifestyle Score: 85"),
                 Row(
                   children: <Widget>[
                     const Text(
@@ -875,7 +867,14 @@ class _ProfileScreenState extends State<ProfileScreen> {
                     updateProfile();
                   },
                   child: const Text("Save Changes"),
-                )
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    Provider.of<MutableValues>(context, listen: false)
+                        .signOut();
+                  },
+                  child: const Text("Sign Out"),
+                ),
               ],
             )));
   }
