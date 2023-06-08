@@ -16,24 +16,36 @@ class User {
   String workCity;
   String workState;
   String workZipcode;
-
-  User({
-    required this.firstName,
-    required this.lastName,
-    required this.gender,
-    required this.height,
-    required this.birthDate,
-    required this.activityLevel,
-    required this.homeAddress,
-    required this.homeCity,
-    required this.homeState,
-    required this.homeZipcode,
-    required this.hoursOfSleep,
-    required this.uuid,
-    required this.weight,
-    required this.workAddress,
-    required this.workCity,
-    required this.workState,
-    required this.workZipcode,
-  });
+  num desiredDaysPerWeek;
+  num desiredTimePerWorkout;
+  num desiredCalories;
+  num desiredProtein;
+  num desiredCarbs;
+  num desiredFat;
+  num desiredPriceLevel;
+  User(
+      {required this.firstName,
+      required this.lastName,
+      required this.gender,
+      required this.height,
+      required this.birthDate,
+      required this.activityLevel,
+      required this.homeAddress,
+      required this.homeCity,
+      required this.homeState,
+      required this.homeZipcode,
+      required this.hoursOfSleep,
+      required this.uuid,
+      required this.weight,
+      required this.workAddress,
+      required this.workCity,
+      required this.workState,
+      required this.workZipcode,
+      required this.desiredDaysPerWeek,
+      required this.desiredTimePerWorkout,
+      required this.desiredCalories,
+      required this.desiredProtein,
+      required this.desiredCarbs,
+      required this.desiredFat,
+      required this.desiredPriceLevel});
 }

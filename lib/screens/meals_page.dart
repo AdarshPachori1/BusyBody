@@ -1,11 +1,33 @@
+import 'package:adarshpachori/models/user.dart';
 import 'package:adarshpachori/models/food.dart';
 import 'package:adarshpachori/models/restaurant.dart';
 import 'package:adarshpachori/screens/recipe_expanded_page.dart';
 import 'package:adarshpachori/screens/restaurant_expanded_page.dart';
+import 'package:adarshpachori/models/mutable_values.dart';
+import '../models/recipe.dart';
+
 import 'package:flutter/material.dart';
 import 'package:geolocator/geolocator.dart';
+import 'package:provider/provider.dart';
 
-import '../models/recipe.dart';
+/// Get numerical representation for dollar sign "$" price level
+int getNumForPriceLevel(String priceLevel) {
+  /// Price level should be between "$" and "$$$$$"
+  switch (priceLevel) {
+    case "\$":
+      return 1;
+    case "\$\$":
+      return 2;
+    case "\$\$\$":
+      return 3;
+    case "\$\$\$\$":
+      return 4;
+    case "\$\$\$\$\$":
+      return 5;
+    default:
+      return 0;
+  }
+}
 
 class MealsScreen extends StatefulWidget {
   const MealsScreen({super.key});
@@ -111,12 +133,18 @@ class _MealsScreenState extends State<MealsScreen> {
     double widthOfScreen = MediaQuery.of(context).size.width;
     requestPermission();
 
+    // get user desired workout parameters
+    final User user = Provider.of<MutableValues>(context, listen: false).user;
     // rank recipes before recommending
-    final List<Recipe> rankedRecipes =
-        getRankedRecipes(homeRecipes, 1000, 30, 25, 10);
+    final List<Recipe> rankedRecipes = getRankedRecipes(
+        homeRecipes,
+        user.desiredCalories,
+        user.desiredProtein,
+        user.desiredCarbs,
+        user.desiredFat);
     // rank restaurants before recommending
-    final List<Restaurant> rankedRestaurants = getRankedRestaurants(
-        unrankedRestaurants, 2); // TODO: use to dislay list of restaurants
+    final List<Restaurant> rankedRestaurants =
+        getRankedRestaurants(unrankedRestaurants, user.desiredPriceLevel);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,

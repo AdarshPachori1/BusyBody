@@ -18,7 +18,7 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
   double activityLevel = 1; //1<=activityLevel<=5
   String homeState = "AL";
   String workState = "AL";
-  double desiredCalories= 0;
+  double desiredCalories = 0;
   double desiredProtein = 0;
   double desiredCarbs = 0;
   double desiredFat = 0;
@@ -34,11 +34,16 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
       TextEditingController();
   final TextEditingController hoursOfSleepInputController =
       TextEditingController();
-  final TextEditingController desiredCaloriesInputController = TextEditingController();
-  final TextEditingController desiredProteinInputController = TextEditingController();
-  final TextEditingController desiredCarbsInputController = TextEditingController();
-  final TextEditingController desiredFatInputController = TextEditingController();
-  final TextEditingController timePerWorkoutInputController = TextEditingController();
+  final TextEditingController desiredCaloriesInputController =
+      TextEditingController();
+  final TextEditingController desiredProteinInputController =
+      TextEditingController();
+  final TextEditingController desiredCarbsInputController =
+      TextEditingController();
+  final TextEditingController desiredFatInputController =
+      TextEditingController();
+  final TextEditingController timePerWorkoutInputController =
+      TextEditingController();
   final TextEditingController homeAddressInputController =
       TextEditingController();
   final TextEditingController homeCityInputController = TextEditingController();
@@ -112,7 +117,7 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
     "Other",
     "Prefer not to say",
   ];
-  final List<int> daysPerWeekChoices = <int>[1,2,3,4,5,6,7];
+  final List<int> daysPerWeekChoices = <int>[1, 2, 3, 4, 5, 6, 7];
   final List<String> heightNames = <String>[
     "4' 1\"",
     "4' 2\"",
@@ -505,15 +510,17 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
                                               (int selectedItem) {
                                             setState(() {
                                               selectedDays = selectedItem;
-                                              daysPerWeek =
-                                                  daysPerWeekChoices[selectedDays];
+                                              daysPerWeek = daysPerWeekChoices[
+                                                  selectedDays];
                                             });
                                           },
                                           children: List<Widget>.generate(
-                                              daysPerWeekChoices.length, (int index) {
+                                              daysPerWeekChoices.length,
+                                              (int index) {
                                             return Center(
                                               child: Text(
-                                                daysPerWeekChoices[index].toString(),
+                                                daysPerWeekChoices[index]
+                                                    .toString(),
                                               ),
                                             );
                                           }),
@@ -521,7 +528,8 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
                                       ),
                                       // This displays the selected fruit name.
                                       child: Text(
-                                        daysPerWeekChoices[selectedDays].toString(),
+                                        daysPerWeekChoices[selectedDays]
+                                            .toString(),
                                         style: const TextStyle(
                                           fontSize: 22.0,
                                         ),
@@ -544,7 +552,8 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
                                     const SizedBox(width: 8.0),
                                     Flexible(
                                       child: TextField(
-                                        controller: desiredCaloriesInputController,
+                                        controller:
+                                            desiredCaloriesInputController,
                                         keyboardType: TextInputType.number,
                                         decoration: const InputDecoration(
                                           border: UnderlineInputBorder(),
@@ -566,7 +575,8 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
                                     const SizedBox(width: 8.0),
                                     Flexible(
                                       child: TextField(
-                                        controller: desiredProteinInputController,
+                                        controller:
+                                            desiredProteinInputController,
                                         keyboardType: TextInputType.number,
                                         decoration: const InputDecoration(
                                           border: UnderlineInputBorder(),
@@ -632,7 +642,8 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
                                     const SizedBox(width: 8.0),
                                     Flexible(
                                       child: TextField(
-                                        controller: timePerWorkoutInputController,
+                                        controller:
+                                            timePerWorkoutInputController,
                                         keyboardType: TextInputType.number,
                                         decoration: const InputDecoration(
                                           border: UnderlineInputBorder(),
@@ -929,38 +940,50 @@ class _OnboardingPageOneState extends State<OnboardingPageOne> {
                                       context
                                           .read<MutableValues>()
                                           .completedSignUp(
-                                              firstName:
-                                                  firstNameInputController.text,
-                                              lastName:
-                                                  lastNameInputController.text,
-                                              weight:
-                                                  weightInputController.text,
-                                              birthDate:
-                                                  birthDateInputController.text,
-                                              gender: gender,
-                                              height: height,
-                                              activityLevel: activityLevel,
-                                              hoursOfSleep:
-                                                  hoursOfSleepInputController
-                                                      .text,
-                                              homeAddress:
-                                                  homeAddressInputController
-                                                      .text,
-                                              homeCity:
-                                                  homeCityInputController.text,
-                                              homeState: homeState,
-                                              homeZipcode:
-                                                  homeZipcodeInputController
-                                                      .text,
-                                              workAddress:
-                                                  workAddressInputController
-                                                      .text,
-                                              workCity:
-                                                  workCityInputController.text,
-                                              workState: workState,
-                                              workZipcode:
-                                                  workZipcodeInputController
-                                                      .text);
+                                            firstName:
+                                                firstNameInputController.text,
+                                            lastName:
+                                                lastNameInputController.text,
+                                            weight: weightInputController.text,
+                                            birthDate:
+                                                birthDateInputController.text,
+                                            gender: gender,
+                                            height: height,
+                                            activityLevel: activityLevel,
+                                            hoursOfSleep:
+                                                hoursOfSleepInputController
+                                                    .text,
+                                            homeAddress:
+                                                homeAddressInputController.text,
+                                            homeCity:
+                                                homeCityInputController.text,
+                                            homeState: homeState,
+                                            homeZipcode:
+                                                homeZipcodeInputController.text,
+                                            workAddress:
+                                                workAddressInputController.text,
+                                            workCity:
+                                                workCityInputController.text,
+                                            workState: workState,
+                                            workZipcode:
+                                                workZipcodeInputController.text,
+                                            desiredCalories: int.parse(
+                                                desiredCaloriesInputController
+                                                    .text),
+                                            desiredProtein: int.parse(
+                                                desiredProteinInputController
+                                                    .text),
+                                            desiredCarbs: int.parse(
+                                                desiredCarbsInputController
+                                                    .text),
+                                            desiredFat: int.parse(
+                                                desiredFatInputController.text),
+                                            desiredPriceLevel: priceLevel,
+                                            desiredDaysPerWeek: daysPerWeek,
+                                            desiredTimePerWorkout: int.parse(
+                                                timePerWorkoutInputController
+                                                    .text),
+                                          );
                                     },
                                   );
                                   setState(() {

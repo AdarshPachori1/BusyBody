@@ -1,10 +1,11 @@
-import 'package:adarshpachori/models/recipe.dart';
+import 'package:adarshpachori/models/user.dart';
 import 'package:adarshpachori/models/workout.dart';
 import 'package:adarshpachori/screens/exercise_expanded_page.dart';
+import 'package:adarshpachori/models/mutable_values.dart';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
-import 'package:health/health.dart';
-import 'package:flutter/services.dart';
+import 'package:provider/provider.dart';
 
 class FitnessScreen extends StatefulWidget {
   const FitnessScreen({super.key});
@@ -116,8 +117,13 @@ class _FitnessScreenState extends State<FitnessScreen> {
                           url: doc['url']);
                     }).toList();
 
-                    List<Workout> rankedWorkouts =
-                        getRankedWorkouts(unrankedWorkouts, 5, 30);
+                    // get user desired workout parameters
+                    final User user =
+                        Provider.of<MutableValues>(context, listen: false).user;
+                    List<Workout> rankedWorkouts = getRankedWorkouts(
+                        unrankedWorkouts,
+                        user.desiredDaysPerWeek,
+                        user.desiredTimePerWorkout);
 
                     return ListView.builder(
                       itemCount: rankedWorkouts.length,
