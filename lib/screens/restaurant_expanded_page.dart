@@ -12,7 +12,7 @@ class RestaurantFullPage extends StatefulWidget {
 class _RecipeFullPageState extends State<RestaurantFullPage> {
   @override
   Widget build(BuildContext context) {
-    final Restaurant castedRestaurant = widget.restaurant as Restaurant;
+    final Restaurant restaurant = widget.restaurant as Restaurant;
     return Scaffold(
       body: SafeArea(
         child: Column(children: [
@@ -24,11 +24,19 @@ class _RecipeFullPageState extends State<RestaurantFullPage> {
               children: [Icon(Icons.arrow_back), Text("Go Back")],
             ),
           ),
-          Text(castedRestaurant.name),
+          Text(restaurant.name),
           Text(
-            "Address: ${castedRestaurant.address}",
+            "Address: ${restaurant.address}",
           ),
-          Text("Phone: ${castedRestaurant.phone}"),
+          Text("Phone: ${restaurant.phone}"),
+          Text("Image Url: ${restaurant.imageUrl}"),
+          Text(
+              "(Latitude, Longitude): (${restaurant.latitude}, ${restaurant.longitude})"),
+          Text("Price Level: ${restaurant.priceLevel}"),
+          Text("Rating: ${restaurant.rating}"),
+          Text(
+              "Sentiment Rating (based on reviews): ${restaurant.sentimentRating}"),
+          Text("Url: (${restaurant.url}"),
         ]),
       ),
     );

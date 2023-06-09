@@ -77,7 +77,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   // getDistance();
-  await getCurrentUserUUID();
+  //await getCurrentUserUUID();
   print(sleepTime);
   final FlutterLocalNotificationsPlugin flutterLocalNotificationsPlugin =
       FlutterLocalNotificationsPlugin();
@@ -136,7 +136,7 @@ void main() async {
 
 // DateTime now = DateTime.now();
 // DateTime scheduledTime = DateTime(now.year,now.month, now.day, 12, 55, 0); // Example: schedule after 1 hour from now
-  await scheduleNotification();
+  //await scheduleNotification();
   runApp(const MyApp());
 }
 

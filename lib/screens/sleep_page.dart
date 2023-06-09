@@ -91,7 +91,18 @@ class _SleepScreenState extends State<SleepScreen> {
                     ),
                   );
                 },
-              ).toList()
+              ).toList(),
+              sleepData
+                          .map((dataPoint) {
+                            return dataPoint.dateTo
+                                .difference(dataPoint.dateFrom)
+                                .inHours;
+                          })
+                          .toList()
+                          .reduce((value, element) => value + element) >=
+                      8
+                  ? const Text("Great job meeting sleeping goal of 8 hours")
+                  : const Text("Sleep a bit more to meet your sleeping goal!"),
             ],
           );
   }

@@ -4,6 +4,7 @@ import 'package:adarshpachori/models/restaurant.dart';
 import 'package:adarshpachori/screens/recipe_expanded_page.dart';
 import 'package:adarshpachori/screens/restaurant_expanded_page.dart';
 import 'package:adarshpachori/models/mutable_values.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import '../models/recipe.dart';
 
 import 'package:flutter/material.dart';
@@ -37,6 +38,7 @@ class MealsScreen extends StatefulWidget {
 }
 
 class _MealsScreenState extends State<MealsScreen> {
+  FirebaseFirestore firestore = FirebaseFirestore.instance;
   String dropdownValueLocation = "Home";
   List<String> dropdownListLocations = <String>["Home", "Away"];
 
@@ -46,55 +48,11 @@ class _MealsScreenState extends State<MealsScreen> {
     "Bulking",
     "Becoming more Lean"
   ];
-  List<Recipe> homeRecipes = [
-    Recipe(
-        url: "url",
-        name: "Enchiladas",
-        description: "description of Enchiladas",
-        calories: 950,
-        protein: 30,
-        carbs: 15,
-        fat: 5),
-    Recipe(
-        url: "url",
-        name: "Tacos",
-        description: "description of Tacos",
-        calories: 860,
-        protein: 20,
-        carbs: 15,
-        fat: 5),
-    Recipe(
-        url: "url",
-        name: "Burrito",
-        description: "description of Burrito",
-        calories: 500,
-        protein: 10,
-        carbs: 4,
-        fat: 4),
-    Recipe(
-        url: "url",
-        name: "Pancakes",
-        description: "description of Pancakes",
-        calories: 1200,
-        protein: 45,
-        carbs: 25,
-        fat: 10),
-  ];
-
-  List<Restaurant> unrankedRestaurants = [
-    Restaurant(
-        name: "Chic-Fil-A",
-        imageUrl: "imageUrl",
-        url: "restaurantUrl",
-        rating: 5,
-        sentimentRating: 4,
-        latitude: 110.0,
-        longitude: -112.1,
-        priceLevel: "\$\$",
-        address: "address",
-        phone: "phone")
-  ];
-
+  List<Recipe> homeRecipes = [];
+  List<Restaurant> unrankedRestaurants = [];
+  List<Recipe> rankedRecipes = [];
+  List<Restaurant> rankedRestaurants = [];
+  bool runOnce = false;
   void requestPermission() async {
     bool _serviceEnabled;
     LocationPermission _permissionGranted;
@@ -127,24 +85,62 @@ class _MealsScreenState extends State<MealsScreen> {
     });
   }
 
+  void loadRecipesAndRestaurants(User user) async {
+    await firestore.collection('recipes').get().then((value) {
+      List<Recipe> elements_recipes = value.docs
+          .map(
+            (recipe) => Recipe(
+              url: recipe['url'],
+              name: recipe['name'],
+              description: recipe['description'],
+              calories: recipe['calories'],
+              protein: recipe['protein'],
+              carbs: recipe['carbs'],
+              fat: recipe['fat'],
+            ),
+          )
+          .toList();
+      print("recipes: $elements_recipes");
+
+      setState(() {
+        homeRecipes = elements_recipes;
+        rankedRecipes = getRankedRecipes(homeRecipes, user.desiredCalories,
+            user.desiredProtein, user.desiredCarbs, user.desiredFat);
+      });
+    });
+    await firestore.collection('restaurants').get().then((value) {
+      List<Restaurant> elements_restaurants = value.docs
+          .map(
+            (restaurant) => Restaurant(
+              name: restaurant['name'],
+              imageUrl: restaurant['imageUrl'],
+              url: restaurant['url'],
+              rating: restaurant['rating'],
+              sentimentRating: restaurant['sentimentRating'],
+              latitude: restaurant['latitude'],
+              longitude: restaurant['longitude'],
+              priceLevel: restaurant['priceLevel'],
+              address: restaurant['address'],
+              phone: restaurant['phone'],
+            ),
+          )
+          .toList();
+      print("restaurants: $elements_restaurants");
+      setState(() {
+        unrankedRestaurants = elements_restaurants;
+        rankedRestaurants =
+            getRankedRestaurants(unrankedRestaurants, user.desiredPriceLevel);
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     double heightOfScreen = MediaQuery.of(context).size.height;
     double widthOfScreen = MediaQuery.of(context).size.width;
     requestPermission();
-
     // get user desired workout parameters
-    final User user = Provider.of<MutableValues>(context, listen: false).user;
     // rank recipes before recommending
-    final List<Recipe> rankedRecipes = getRankedRecipes(
-        homeRecipes,
-        user.desiredCalories,
-        user.desiredProtein,
-        user.desiredCarbs,
-        user.desiredFat);
-    // rank restaurants before recommending
-    final List<Restaurant> rankedRestaurants =
-        getRankedRestaurants(unrankedRestaurants, user.desiredPriceLevel);
 
     return Column(
       mainAxisAlignment: MainAxisAlignment.start,
@@ -201,10 +197,166 @@ class _MealsScreenState extends State<MealsScreen> {
               : const Text("\t\t\t Restaurant Recommendations"),
         ),
         Container(
-            padding: const EdgeInsets.only(left: 10, right: 10),
-            height: 0.55 * heightOfScreen,
-            width: 0.9 * widthOfScreen,
-            child: SingleChildScrollView(
+          padding: const EdgeInsets.only(left: 10, right: 10),
+          height: 0.55 * heightOfScreen,
+          width: 0.9 * widthOfScreen,
+          child: (dropdownValueLocation == "Home")
+              ? StreamBuilder<QuerySnapshot>(
+                  stream: firestore.collection('recipes').snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+
+                    List<QueryDocumentSnapshot> documentsRecipes =
+                        snapshot.data!.docs;
+
+                    List<Recipe> unrankedRecipes =
+                        documentsRecipes.map((recipe) {
+                      return Recipe(
+                        url: recipe['url'],
+                        name: recipe['title'],
+                        description: recipe['desc'],
+                        calories: recipe['calories'],
+                        protein: recipe['protein'],
+                        carbs: recipe['carbs'],
+                        fat: recipe['fat'],
+                      );
+                    }).toList();
+
+                    // get user desired workout parameters
+                    final User user =
+                        Provider.of<MutableValues>(context, listen: false).user;
+                    List<Recipe> rankedRecipes = getRankedRecipes(
+                      unrankedRecipes,
+                      user.desiredCalories,
+                      user.desiredProtein,
+                      user.desiredCarbs,
+                      user.desiredFat,
+                    );
+
+                    return ListView.builder(
+                      itemCount: rankedRecipes.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        // Build your widget using the data
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder:
+                                    (context, animation, secondaryAnimation) =>
+                                        RecipeFullPage(
+                                            recipeVal: rankedRecipes[index]),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          child: Container(
+                            height: 0.1 * heightOfScreen,
+                            width: 0.9 * widthOfScreen,
+                            padding: const EdgeInsets.only(top: 10, bottom: 10),
+                            margin: const EdgeInsets.symmetric(vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(rankedRecipes[index].name),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                )
+              : StreamBuilder<QuerySnapshot>(
+                  stream: firestore.collection('restaurants').snapshots(),
+                  builder: (BuildContext context,
+                      AsyncSnapshot<QuerySnapshot> snapshot) {
+                    if (snapshot.hasError) {
+                      return Text('Error: ${snapshot.error}');
+                    }
+
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const CircularProgressIndicator();
+                    }
+
+                    List<QueryDocumentSnapshot> documentsRestaurants =
+                        snapshot.data!.docs;
+
+                    List<Restaurant> unrankedRestaurants =
+                        documentsRestaurants.map((restaurant) {
+                      return Restaurant(
+                          name: restaurant['name'],
+                          imageUrl: restaurant['image_url'] ?? "",
+                          url: restaurant['url'] ?? "",
+                          rating: restaurant['rating'] ?? 0,
+                          sentimentRating: restaurant['sentiment_rating'] ?? 0,
+                          latitude: restaurant['coordinates']['latitude'] ?? 0,
+                          longitude:
+                              restaurant['coordinates']['longitude'] ?? 0,
+                          priceLevel: restaurant['price_level'] ?? "",
+                          address: restaurant['address'],
+                          phone: restaurant['phone']);
+                    }).toList();
+
+                    // get user desired workout parameters
+                    final User user =
+                        Provider.of<MutableValues>(context, listen: false).user;
+                    List<Restaurant> rankedRestaurants = getRankedRestaurants(
+                        unrankedRestaurants, user.desiredPriceLevel);
+
+                    return ListView.builder(
+                      itemCount: rankedRestaurants.length,
+                      itemBuilder: (BuildContext context, int index) {
+                        // Build your widget using the data
+                        return GestureDetector(
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              PageRouteBuilder(
+                                pageBuilder: (context, animation,
+                                        secondaryAnimation) =>
+                                    RestaurantFullPage(
+                                        restaurant: rankedRestaurants[index]),
+                                transitionsBuilder: (context, animation,
+                                    secondaryAnimation, child) {
+                                  return FadeTransition(
+                                    opacity: animation,
+                                    child: child,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          child: Container(
+                            height: 0.1 * heightOfScreen,
+                            width: 0.9 * widthOfScreen,
+                            padding: const EdgeInsets.only(top: 10, bottom: 10),
+                            margin: const EdgeInsets.symmetric(vertical: 5),
+                            decoration: BoxDecoration(
+                              color: Colors.grey[300],
+                              borderRadius: BorderRadius.circular(20),
+                            ),
+                            child: Text(rankedRestaurants[index].name),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
+        )
+        /*SingleChildScrollView(
               child: Column(
                 children: (dropdownValueLocation == "Home"
                         ? rankedRecipes
@@ -246,6 +398,7 @@ class _MealsScreenState extends State<MealsScreen> {
                     .toList(),
               ),
             ))
+      */
       ],
     );
   }

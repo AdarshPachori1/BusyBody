@@ -134,6 +134,7 @@ class MutableValues extends ChangeNotifier {
       // Handle any errors
       print('Error retrieving document: $e');
     }
+    print("activity Level: ${data["activityLevel"]}");
     return User(
         firstName: data["firstName"],
         lastName: data["lastName"],
@@ -153,11 +154,11 @@ class MutableValues extends ChangeNotifier {
         workState: data["workState"],
         workZipcode: data["workZipcode"],
         desiredDaysPerWeek: data["daysPerWeek"],
-        desiredTimePerWorkout: data["timePerWorkout"],
-        desiredCalories: data["desiredCalories"],
-        desiredProtein: data["desiredProtein"],
-        desiredCarbs: data["desiredCarbs"],
-        desiredFat: data["desiredFat"],
+        desiredTimePerWorkout: double.parse(data["timePerWorkout"]),
+        desiredCalories: double.parse(data["desiredCalories"]),
+        desiredProtein: double.parse(data["desiredProtein"]),
+        desiredCarbs: double.parse(data["desiredCarbs"]),
+        desiredFat: double.parse(data["desiredFat"]),
         desiredPriceLevel: data["priceLevel"]);
   }
 }
